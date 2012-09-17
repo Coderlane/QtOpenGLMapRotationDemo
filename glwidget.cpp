@@ -93,19 +93,21 @@ GLuint GLWidget::newMaze()
 
     double space = (10.0/sides);
 
+
     // Outer Perimeter
-    for(int i = 0; i <= sides; i ++)
+    for(int i = 0; i <= sides + 1; i ++)
     {
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance2);
-        wallList.append((struct Wall) {  i*space, 10,space});
-        wallList.append((struct Wall) {  i*space,-10,space});
-        wallList.append((struct Wall) { -i*space, 10,space});
-        wallList.append((struct Wall) { -i*space,-10,space});
-        wallList.append((struct Wall) {-10,  i*space,space});
-        wallList.append((struct Wall) { 10,  i*space,space});
-        wallList.append((struct Wall) {-10, -i*space,space});
-        wallList.append((struct Wall) { 10, -i*space,space});
+        wallList.append((struct Wall) {  i*space, 10+space, space});
+        wallList.append((struct Wall) {  i*space,-10-space, space});
+        wallList.append((struct Wall) { -i*space, 10+space, space});
+        wallList.append((struct Wall) { -i*space,-10-space, space});
+        wallList.append((struct Wall) {-10-space,  i*space, space});
+        wallList.append((struct Wall) { 10+space,  i*space, space});
+        wallList.append((struct Wall) {-10-space, -i*space, space});
+        wallList.append((struct Wall) { 10+space, -i*space, space});
     }
+
     // Actual Maze
     for(int a = 0; a < sides; a++)
     {
@@ -113,7 +115,7 @@ GLuint GLWidget::newMaze()
         {
             if(m[a][b] == 1)
             {
-                wallList.append((struct Wall) {-10.0 + ((double)a*2*space),-10.0 + ((double)b*2*space), space});
+                wallList.append((struct Wall) {-10.0 + ((double)a*2*space) + space,-10.0 + ((double)b*2*space) + space , space});
             }
         }
     }

@@ -35,7 +35,7 @@ void MainWindow::on_mapSlider_valueChanged(int value)
 void MainWindow::windowClosed()
 {
     ui->launchButton->setEnabled(true);
-    delete mazeW;
+    //delete mazeW;
     mazeW = NULL;
 }
 

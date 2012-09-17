@@ -27,8 +27,6 @@ void MazeWindow::keyPressEvent(QKeyEvent *pEvent)
         ui->glWidget->pause();
         if(QMessageBox::question(this, "Exit", "Would you like to exit", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
         {
-            // Exit
-            // emit closeGameWindow();
             emit emitClose();
             this->close(); //Probably not necessary, but I'm pretty sure everything will be gone.
         }
