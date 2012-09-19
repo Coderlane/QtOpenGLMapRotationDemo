@@ -47,6 +47,8 @@ private:
     QPoint lastPos;
     GLuint maze;
     GLuint wall;
+    GLuint lightObj;
+
     int sides;
     int xRot;
     int yRot;

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QVector>
 
+// Using code from Whyrusleeping https://github.com/whyrusleeping/MazeGenerator
+
 class QMazeGen : public QObject
 {
     Q_OBJECT

@@ -31,8 +31,7 @@ void GLWidget::initializeGL()
     glEnable(GL_DEPTH_TEST);
 
     glLightfv(GL_LIGHT1, GL_AMBIENT,  LightAmbient);
-    glLightfv(GL_LIGHT1, GL_DIFFUSE,  LightDiffuse);
-    glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
+
 }
 void GLWidget::paintGL()
 {
@@ -42,6 +41,15 @@ void GLWidget::paintGL()
     // Show Text
     glColor3f(1.0f, 1.0f, 1.0f);
     renderText( 10,  9 , 0, "Map Demo", QFont("Ubuntu", 30, 10, false));  
+
+
+    glPushMatrix();
+    glTranslated(0.0,0.0,0.0);
+    //const GLfloat LightPosition[]= {10.0f, 10.0f, 2.0f, 100.0f };
+     glLightfv(GL_LIGHT1, GL_DIFFUSE,  LightDiffuse);
+    glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
+    //glCallList(lightObj);
+    glPopMatrix();
 
     glPushMatrix();
     glRotated(xRot / 16.0, 1.0, 0.0, 0.0);
@@ -81,6 +89,7 @@ void GLWidget::setupSim(int s, QVector<QVector<short> > nM)
     sides = s;
     wall = newWall();
     maze = newMaze();
+    lightObj = newWall();
     unpause();
     updateGL();
 
@@ -90,6 +99,7 @@ GLuint GLWidget::newMaze()
     GLuint list = glGenLists(1);
     glNewList(list, GL_COMPILE);
     glColor3f(0, 1, 0); // Green
+
 
     double space = (10.0/sides);
 
@@ -190,7 +200,7 @@ GLuint GLWidget::newMaze()
 void GLWidget::drawMaze(GLuint p, double dx, double dy, double dz)
 {
     glPushMatrix();
-    glColor3f(0, 1, 0); // Green
+    //glColor3f(0, 1, 0); // Green
     glTranslated(dx, dy, dz);
     glCallList(p);
     glPopMatrix();
@@ -210,35 +220,43 @@ GLuint GLWidget::newWall()
     // Begin Wall
     glBegin(GL_QUADS);
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance);
+
+    glNormal3f( 0.0f, 1.0f, 0.0f);
     glVertex3f( r, r,-h);
     glVertex3f(-r, r,-h);
     glVertex3f(-r, r, h);
     glVertex3f( r, r, h);
 
+    glNormal3f( 0.0f, -1.0f, 0.0f);
     glVertex3f( r,-r, h);
     glVertex3f(-r,-r, h);
     glVertex3f(-r,-r,-h);
     glVertex3f( r,-r,-h);
 
+    glNormal3f( 0.0f, 0.0f, 1.0f);
     glVertex3f( r, r, h);
     glVertex3f(-r, r, h);
     glVertex3f(-r,-r, h);
     glVertex3f( r,-r, h);
 
+    glNormal3f( 0.0f, 0.0f, -1.0f);
     glVertex3f( r,-r,-h);
     glVertex3f(-r,-r,-h);
     glVertex3f(-r, r,-h);
     glVertex3f( r, r,-h);
 
+    glNormal3f( -1.0f, 0.0f, 0.0f);
     glVertex3f(-r, r, h);
     glVertex3f(-r, r,-h);
     glVertex3f(-r,-r,-h);
     glVertex3f(-r,-r, h);
 
+    glNormal3f( 1.0f, 0.0f, 0.0f);
     glVertex3f( r, r,-h);
     glVertex3f( r, r, h);
     glVertex3f( r,-r, h);
     glVertex3f( r,-r,-h);
+
     glEnd();
 
     glEndList();
