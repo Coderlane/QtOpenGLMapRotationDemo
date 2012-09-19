@@ -17,11 +17,13 @@ struct Wall
 
 const GLfloat LightAmbient[]= { 0.5f, 0.5f, 0.5f, 0.0f };
 const GLfloat LightDiffuse[]= { 10.0f, 10.0f, 10.0f, 1.0f };
-const GLfloat LightPosition[]= {10.0f, 10.0f, 2.0f, 100.0f };
+const GLfloat LightPosition[]= {0.0f, 0.0f, 10.0f, 10.0f };
 
 const GLfloat reflectance[4] = { 0.0f, 0.8f, 0.0f, 1.0f };
 const GLfloat reflectance1[4] = { 0.5f, 0.1f, 0.0f, 1.0f };
-const GLfloat reflectance2[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+const GLfloat reflectance2[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
@@ -47,7 +49,6 @@ private:
     QPoint lastPos;
     GLuint maze;
     GLuint wall;
-    GLuint lightObj;
 
     int sides;
     int xRot;

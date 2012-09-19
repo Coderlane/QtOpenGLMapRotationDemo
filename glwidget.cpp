@@ -28,6 +28,7 @@ void GLWidget::initializeGL()
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+    //glEnable(GL_LIGHT1);
     glEnable(GL_DEPTH_TEST);
 
     glLightfv(GL_LIGHT1, GL_AMBIENT,  LightAmbient);
@@ -35,6 +36,7 @@ void GLWidget::initializeGL()
 }
 void GLWidget::paintGL()
 {
+    // Background and clearing
     qglClearColor(QColor(Qt::black));
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -42,15 +44,14 @@ void GLWidget::paintGL()
     glColor3f(1.0f, 1.0f, 1.0f);
     renderText( 10,  9 , 0, "Map Demo", QFont("Ubuntu", 30, 10, false));  
 
-
+    // Place the lights about the origin
     glPushMatrix();
     glTranslated(0.0,0.0,0.0);
-    //const GLfloat LightPosition[]= {10.0f, 10.0f, 2.0f, 100.0f };
-     glLightfv(GL_LIGHT1, GL_DIFFUSE,  LightDiffuse);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE,  LightDiffuse);
     glLightfv(GL_LIGHT1, GL_POSITION, LightPosition);
-    //glCallList(lightObj);
     glPopMatrix();
 
+    // Rotate and draw the maze stuff
     glPushMatrix();
     glRotated(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotated(yRot / 16.0, 0.0, 1.0, 0.0);
@@ -89,22 +90,81 @@ void GLWidget::setupSim(int s, QVector<QVector<short> > nM)
     sides = s;
     wall = newWall();
     maze = newMaze();
-    lightObj = newWall();
     unpause();
     updateGL();
-
 }
 GLuint GLWidget::newMaze()
 {
     GLuint list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-    glColor3f(0, 1, 0); // Green
 
+    // Grid
+    // Odd case, try to combine?
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance2);
+    if(sides%2 == 0)
+    {
+        double ratio = ((10.0/(double)sides))*2.0;
+        glBegin(GL_LINES);
+        glVertex3f(10, 0, 0.0f);
+        glVertex3f(-10, 0, 0.0f);
+        glEnd();
+        for(int i = 0; i < sides/2.0; i++)
+        {
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(10, i*ratio, 0.0f);
+            glVertex3f(-10, i*ratio, 0.0f);
+            glEnd();
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(10, -i*ratio, 0.0f);
+            glVertex3f(-10, -i*ratio, 0.0f);
+            glEnd();
 
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(i*ratio, 10, 0.0f);
+            glVertex3f(i*ratio, -10, 0.0f);
+            glEnd();
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(-i*ratio, 10, 0.0f);
+            glVertex3f(-i*ratio, -10, 0.0f);
+            glEnd();
+        }
+    }
+    // Even case, try to combine?
+    else
+    {
+        double ratio = (10.0/(double)sides)*2.0;
+        for(int i = 0; i < sides/2.0; i++)
+        {
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(10, (ratio/2.0) + (i*ratio), 0.0f);
+            glVertex3f(-10, (ratio/2.0) + (i*ratio), 0.0f);
+            glEnd();
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(10, -((ratio/2.0) + (i*ratio)), 0.0f);
+            glVertex3f(-10, -((ratio/2.0) + (i*ratio)), 0.0f);
+            glEnd();
+
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(((ratio/2.0) + (i*ratio)), 10, 0.0f);
+            glVertex3f(((ratio/2.0) + (i*ratio)), -10, 0.0f);
+            glEnd();
+            glBegin(GL_LINES);
+            glNormal3f( 0.0f, 0.0f, 1.0f);
+            glVertex3f(-((ratio/2.0) + (i*ratio)), 10, 0.0f);
+            glVertex3f(-((ratio/2.0) + (i*ratio)), -10, 0.0f);
+            glEnd();
+        }
+    }
+
+    // Outer Perimeter of walls
     double space = (10.0/sides);
-
-
-    // Outer Perimeter
     for(int i = 0; i <= sides + 1; i ++)
     {
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance2);
@@ -129,78 +189,12 @@ GLuint GLWidget::newMaze()
             }
         }
     }
-
-    // Rectangle
-    glBegin(GL_LINE_LOOP);
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance1);
-    glVertex3f(-10, -10, 0.0f);
-    glVertex3f(-10, 10, 0.0f);
-    glVertex3f(10, 10, 0.0f);
-    glVertex3f(10, -10, 0.0f);
-    glEnd();
-
-    // Grid
-    // Odd case, try to combine?
-    if(sides%2 == 0)
-    {
-        double ratio = ((10.0/(double)sides))*2.0;
-        glBegin(GL_LINES);
-        glVertex3f(10, 0, 0.0f);
-        glVertex3f(-10, 0, 0.0f);
-        glEnd();
-        for(int i = 0; i < sides/2.0; i++)
-        {
-            glBegin(GL_LINES);
-            glVertex3f(10, i*ratio, 0.0f);
-            glVertex3f(-10, i*ratio, 0.0f);
-            glEnd();
-            glBegin(GL_LINES);
-            glVertex3f(10, -i*ratio, 0.0f);
-            glVertex3f(-10, -i*ratio, 0.0f);
-            glEnd();
-
-            glBegin(GL_LINES);
-            glVertex3f(i*ratio, 10, 0.0f);
-            glVertex3f(i*ratio, -10, 0.0f);
-            glEnd();
-            glBegin(GL_LINES);
-            glVertex3f(-i*ratio, 10, 0.0f);
-            glVertex3f(-i*ratio, -10, 0.0f);
-            glEnd();
-        }
-    }
-    // Even case, try to combine?
-    else
-    {
-        double ratio = (10.0/(double)sides)*2.0;
-        for(int i = 0; i < sides/2.0; i++)
-        {
-            glBegin(GL_LINES);
-            glVertex3f(10, (ratio/2.0) + (i*ratio), 0.0f);
-            glVertex3f(-10, (ratio/2.0) + (i*ratio), 0.0f);
-            glEnd();
-            glBegin(GL_LINES);
-            glVertex3f(10, -((ratio/2.0) + (i*ratio)), 0.0f);
-            glVertex3f(-10, -((ratio/2.0) + (i*ratio)), 0.0f);
-            glEnd();
-
-            glBegin(GL_LINES);
-            glVertex3f(((ratio/2.0) + (i*ratio)), 10, 0.0f);
-            glVertex3f(((ratio/2.0) + (i*ratio)), -10, 0.0f);
-            glEnd();
-            glBegin(GL_LINES);
-            glVertex3f(-((ratio/2.0) + (i*ratio)), 10, 0.0f);
-            glVertex3f(-((ratio/2.0) + (i*ratio)), -10, 0.0f);
-            glEnd();
-        }
-    }
     glEndList();
     return list;
 }
 void GLWidget::drawMaze(GLuint p, double dx, double dy, double dz)
 {
     glPushMatrix();
-    //glColor3f(0, 1, 0); // Green
     glTranslated(dx, dy, dz);
     glCallList(p);
     glPopMatrix();
@@ -209,62 +203,60 @@ GLuint GLWidget::newWall()
 {
     GLuint list = glGenLists(1);
     glNewList(list, GL_COMPILE);
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance); // Setup the material
 
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance);
-
-    glColor3f(0, 1, 0); // Green
-
-    double r = (10.0/sides);//2.0;
-    double h = r/1.5;
+    double r = (10.0/sides);
+    double h = r; // I am going to keep this here so I can mess with it later (height of the box)
 
     // Begin Wall
     glBegin(GL_QUADS);
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance);
 
-    glNormal3f( 0.0f, 1.0f, 0.0f);
+    // Each of these normals represents how the reflection
+    // will be calulated. The vertexes are the actual box
+    // verticies.
+    glNormal3f( 0.0f, 1.0f, 0.0f); // Up
     glVertex3f( r, r,-h);
     glVertex3f(-r, r,-h);
     glVertex3f(-r, r, h);
     glVertex3f( r, r, h);
 
-    glNormal3f( 0.0f, -1.0f, 0.0f);
+    glNormal3f( 0.0f, -1.0f, 0.0f); // Down
     glVertex3f( r,-r, h);
     glVertex3f(-r,-r, h);
     glVertex3f(-r,-r,-h);
     glVertex3f( r,-r,-h);
 
-    glNormal3f( 0.0f, 0.0f, 1.0f);
+    glNormal3f( 0.0f, 0.0f, 1.0f); // Towards
     glVertex3f( r, r, h);
     glVertex3f(-r, r, h);
     glVertex3f(-r,-r, h);
     glVertex3f( r,-r, h);
 
-    glNormal3f( 0.0f, 0.0f, -1.0f);
+    glNormal3f( 0.0f, 0.0f, -1.0f); // Away
     glVertex3f( r,-r,-h);
     glVertex3f(-r,-r,-h);
     glVertex3f(-r, r,-h);
     glVertex3f( r, r,-h);
 
-    glNormal3f( -1.0f, 0.0f, 0.0f);
+    glNormal3f( -1.0f, 0.0f, 0.0f); // Left
     glVertex3f(-r, r, h);
     glVertex3f(-r, r,-h);
     glVertex3f(-r,-r,-h);
     glVertex3f(-r,-r, h);
 
-    glNormal3f( 1.0f, 0.0f, 0.0f);
+    glNormal3f( 1.0f, 0.0f, 0.0f);  // Right
     glVertex3f( r, r,-h);
     glVertex3f( r, r, h);
     glVertex3f( r,-r, h);
     glVertex3f( r,-r,-h);
-
     glEnd();
-
     glEndList();
     return list;
 }
 void GLWidget::drawWalls()
 {
-    glColor3f(0, 1, 0); // Green
+    glColor3f(1, 1, 0); // Green
     for(int i = 0; i < wallList.count(); i++)
     {
         glPushMatrix();
