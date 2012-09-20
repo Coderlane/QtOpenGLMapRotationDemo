@@ -10,10 +10,31 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent)
     xRot = 0;
     yRot = 0;
     zRot = 0;
-
+    ballPos.x = 0;
+    ballPos.y = 0;
+    ballDY = 0;
+    ballDX = 0;
 }
 void GLWidget::loop()
 {
+    if(ballDY != 0 || ballDX != 0)
+    {
+        Coord newPos;
+        newPos.x = ballPos.x;
+        newPos.y = ballPos.y;
+        if(ballDY != 0)
+        {
+            newPos.y += ballDY;
+            newPos.y = checkY(newPos.y);
+        }
+        if(ballDX != 0)
+        {
+            newPos.x  += ballDX;
+            newPos.x = checkX(newPos.x);
+        }
+        ballPos.x = newPos.x;
+        ballPos.y = newPos.y;
+    }
     updateGL();
 }
 void GLWidget::initializeGL()
@@ -30,9 +51,7 @@ void GLWidget::initializeGL()
     glEnable(GL_LIGHT0);
     //glEnable(GL_LIGHT1);
     glEnable(GL_DEPTH_TEST);
-
     glLightfv(GL_LIGHT1, GL_AMBIENT,  LightAmbient);
-
 }
 void GLWidget::paintGL()
 {
@@ -56,8 +75,10 @@ void GLWidget::paintGL()
     glRotated(xRot / 16.0, 1.0, 0.0, 0.0);
     glRotated(yRot / 16.0, 0.0, 1.0, 0.0);
     glRotated(zRot / 16.0, 0.0, 0.0, 1.0);
-    drawMaze(maze, 0, 0, 0);
+    drawList(maze, 0, 0, 0);
     drawWalls();
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance2);
+    drawList(ball, ballPos.x, ballPos.y, (10.0/sides) * ball_size); // Shift the ball upwards
     glPopMatrix();
 }
 void GLWidget::resizeGL(int width, int height)
@@ -74,7 +95,7 @@ void GLWidget::resizeGL(int width, int height)
     gluPerspective(30.0f,ratio,0.1f,100.0f);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslated(0.0, 0.0, -40);
+    glTranslated(0.0, 0.0, -50);
 }
 void GLWidget::pause()
 {
@@ -90,6 +111,9 @@ void GLWidget::setupSim(int s, QVector<QVector<short> > nM)
     sides = s;
     wall = newWall();
     maze = newMaze();
+    ball = newBall();
+    ballPos.x = -10 + ((10.0/(double)sides));//*2.0 ;
+    ballPos.y = 10 - ((10.0/(double)sides));//*2.0;
     unpause();
     updateGL();
 }
@@ -162,22 +186,25 @@ GLuint GLWidget::newMaze()
             glEnd();
         }
     }
+    float space = (10.0/sides);
+    /*
 
     // Outer Perimeter of walls
-    double space = (10.0/sides);
+
     for(int i = 0; i <= sides + 1; i ++)
     {
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance2);
-        wallList.append((struct Wall) {  i*space, 10+space, space});
-        wallList.append((struct Wall) {  i*space,-10-space, space});
-        wallList.append((struct Wall) { -i*space, 10+space, space});
-        wallList.append((struct Wall) { -i*space,-10-space, space});
-        wallList.append((struct Wall) {-10-space,  i*space, space});
-        wallList.append((struct Wall) { 10+space,  i*space, space});
-        wallList.append((struct Wall) {-10-space, -i*space, space});
-        wallList.append((struct Wall) { 10+space, -i*space, space});
+        wallList.append((struct Coord) {  i*space, 10+space, space});
+        wallList.append((struct Coord) {  i*space,-10-space, space});
+        wallList.append((struct Coord) { -i*space, 10+space, space});
+        wallList.append((struct Coord) { -i*space,-10-space, space});
+        wallList.append((struct Coord) {-10-space,  i*space, space});
+        wallList.append((struct Coord) { 10+space,  i*space, space});
+        wallList.append((struct Coord) {-10-space, -i*space, space});
+        wallList.append((struct Coord) { 10+space, -i*space, space});
     }
-
+        */
+    wallList.append((struct Coord) {-10.0f + ((float)0*2*space) + space,-10.0f + ((float)0*2*space) + space , space});
     // Actual Maze
     for(int a = 0; a < sides; a++)
     {
@@ -185,28 +212,22 @@ GLuint GLWidget::newMaze()
         {
             if(m[a][b] == 1)
             {
-                wallList.append((struct Wall) {-10.0 + ((double)a*2*space) + space,-10.0 + ((double)b*2*space) + space , space});
+                wallList.append((struct Coord) {-10.0f + ((float)a*2*space) + space,-10.0f + ((float)b*2*space) + space , space});
             }
         }
     }
     glEndList();
     return list;
 }
-void GLWidget::drawMaze(GLuint p, double dx, double dy, double dz)
-{
-    glPushMatrix();
-    glTranslated(dx, dy, dz);
-    glCallList(p);
-    glPopMatrix();
-}
+
 GLuint GLWidget::newWall()
 {
     GLuint list = glGenLists(1);
     glNewList(list, GL_COMPILE);
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, reflectance); // Setup the material
 
-    double r = (10.0/sides);
-    double h = r; // I am going to keep this here so I can mess with it later (height of the box)
+    float r = (10.0/sides);
+    float h = r; // I am going to keep this here so I can mess with it later (height of the box)
 
     // Begin Wall
     glBegin(GL_QUADS);
@@ -315,4 +336,130 @@ void GLWidget::normalizeAngle(int *angle)
         *angle += 360 * 16;
     while (*angle > 360 * 16)
         *angle -= 360 * 16;
+}
+GLuint GLWidget::newBall()
+{
+    GLuint list = glGenLists(1);
+    glNewList(list, GL_COMPILE);
+    double r = (10.0/sides) * ball_size;
+    gluSphere(gluNewQuadric(), r , ball_sides , ball_sectors);
+    glEndList();
+    return list;
+}
+void GLWidget::drawList(GLuint p, double dx, double dy, double dz)
+{
+    glPushMatrix();
+    glTranslated(dx, dy, dz);
+    glCallList(p);
+    glPopMatrix();
+}
+void GLWidget::ballUp()
+{
+    ballDY = ball_dy_max * ball_ds;
+}
+
+void GLWidget::ballDown()
+{
+    ballDY = -(ball_dy_max * ball_ds);
+}
+
+void GLWidget::ballLeft()
+{
+    ballDX = -(ball_dx_max * ball_ds);
+}
+
+void GLWidget::ballRight()
+{
+    ballDX = (ball_dx_max * ball_ds);
+}
+void GLWidget::ballUpRel()
+{
+    ballDY = 0;
+}
+
+void GLWidget::ballDownRel()
+{
+    ballDY = 0;
+}
+
+void GLWidget::ballLeftRel()
+{
+    ballDX = 0;
+}
+
+void GLWidget::ballRightRel()
+{
+    ballDX = 0;
+}
+
+
+
+// These functions are only for X and Y position...
+// Coords are -10 to 10
+Coord GLWidget::toCoord2D(Grid g)
+{
+    float space = (10.0/sides);
+    // Coord X, Y , Z
+    Coord c;
+    c.x = (-10.0f + ((float)g.x*2*space) + space);
+    c.y = (-10.0f + ((float)g.y*2*space) + space);
+    c.z = 0.0f;
+    return c;
+}
+
+// Grids are 10x10 to 50x50
+
+// 0, 0 should be bottom left.....
+Grid GLWidget::toGrid2D(Coord c)
+{
+
+    float space = (10.0/sides);
+    Grid g;
+    float tx = sides + (c.x * space);
+    float ty = sides + (c.y * space);
+    if(ty >(int)ty)
+        g.y = ((int)ty)+1;
+    else
+        g.y = ty;
+    if(tx > (int)tx)
+        g.x = ((int)tx)+1;
+    else
+        g.x = tx;
+    return g;
+}
+QVector<Grid> GLWidget::checkOpenAround(Grid g)
+{
+    QVector<Grid> openGrid;
+    if(g.x < sides)
+    {
+        if(m[g.x+1][g.y])
+            openGrid.append((struct Grid) {g.x+1, g.y});
+    }
+    if(g.x > 0)
+    {
+        if(m[g.x-1][g.y])
+            openGrid.append((struct Grid) {g.x-1, g.y});
+    }
+    if(g.y < sides)
+    {
+        if(m[g.x][g.y+1])
+            openGrid.append((struct Grid) {g.x, g.y+1});
+
+    }
+    if(g.y > 0)
+    {
+        if(m[g.x][g.y-1])
+            openGrid.append((struct Grid) {g.x, g.y-1});
+    }
+    return openGrid;
+}
+
+float GLWidget::checkX(float x)
+{
+    return x;
+}
+
+float GLWidget::checkY(float y)
+{
+    return y;
 }

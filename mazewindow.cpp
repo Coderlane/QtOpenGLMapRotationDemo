@@ -34,6 +34,43 @@ void MazeWindow::keyPressEvent(QKeyEvent *pEvent)
         ui->glWidget->unpause();
         setCursor(Qt::OpenHandCursor); // Back to hiding
     }
+    else if(pEvent->key() == Qt::Key_W || pEvent->key() == Qt::Key_Up)
+    {
+        ui->glWidget->ballUp();
+    }
+    else if(pEvent->key() == Qt::Key_S || pEvent->key() == Qt::Key_Down)
+    {
+        ui->glWidget->ballDown();
+    }
+    else if(pEvent->key() == Qt::Key_A || pEvent->key() == Qt::Key_Left)
+    {
+        ui->glWidget->ballLeft();
+    }
+    else if(pEvent->key() == Qt::Key_D || pEvent->key() == Qt::Key_Right)
+    {
+        ui->glWidget->ballRight();
+    }
     else
         QWidget::keyPressEvent(pEvent);
+}
+void MazeWindow::keyReleaseEvent( QKeyEvent* pEvent )
+{
+    if(pEvent->key() == Qt::Key_W || pEvent->key() == Qt::Key_Up)
+    {
+        ui->glWidget->ballUpRel();
+    }
+    else if(pEvent->key() == Qt::Key_S || pEvent->key() == Qt::Key_Down)
+    {
+        ui->glWidget->ballDownRel();
+    }
+    else if(pEvent->key() == Qt::Key_A || pEvent->key() == Qt::Key_Left)
+    {
+        ui->glWidget->ballLeftRel();
+    }
+    else if(pEvent->key() == Qt::Key_D || pEvent->key() == Qt::Key_Right)
+    {
+        ui->glWidget->ballRightRel();
+    }
+    else
+        QWidget::keyReleaseEvent(pEvent);
 }

@@ -3,16 +3,23 @@
 
 #include <QGLWidget>
 #include <GL/glu.h>
+#include <GL/freeglut.h>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QList>
 #include <QVector>
 
-struct Wall
+struct Coord
 {
-    double x;
-    double y;
-    double z;
+    float x;
+    float y;
+    float z;
+};
+
+struct Grid
+{
+    int x;
+    int y;
 };
 
 const GLfloat LightAmbient[]= { 0.5f, 0.5f, 0.5f, 0.0f };
@@ -24,12 +31,30 @@ const GLfloat reflectance1[4] = { 0.5f, 0.1f, 0.0f, 1.0f };
 const GLfloat reflectance2[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 
+// Ball Object
+const int    ball_sides   = 30;
+const int    ball_sectors = 30;
+const double ball_size    = .666;
+// Ball Movement
+const double ball_dy_max  = .5;
+const double ball_dx_max  = .5;
+const double ball_ds      = 1;
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
 public:
     explicit GLWidget(QWidget *parent = 0);
 
+    void ballUp();
+    void ballDown();
+    void ballLeft();
+    void ballRight();
+
+    void ballUpRel();
+    void ballDownRel();
+    void ballLeftRel();
+    void ballRightRel();
 protected:
     void initializeGL();
     void paintGL();
@@ -45,26 +70,41 @@ protected:
 
 private:
     // Variables
-    QTimer *timer;
     QPoint lastPos;
     GLuint maze;
     GLuint wall;
+    GLuint ball;
 
     int sides;
     int xRot;
     int yRot;
     int zRot;
-    QList<Wall> wallList;
+    QTimer *timer;
+    QList<Coord> wallList;
+    QVector<QVector<short> > m;
+
+    double ballDY;
+    double ballDX;
+    Coord ballPos;
 
     // Functions
+    // Ball
+    GLuint newBall();
+    float checkX(float x);
+    float checkY(float y);
     // Maze
     GLuint newMaze();
-    void drawMaze(GLuint p, double dx, double dy, double dz);
     // Wall
     GLuint newWall();
     void drawWalls();
+    // Generic
+    void drawList(GLuint p, double dx, double dy, double dz);
 
-    QVector<QVector<short> > m;
+
+    // Hit testing
+    Coord toCoord2D(Grid g);
+    Grid toGrid2D(Coord c);
+    QVector<Grid> checkOpenAround(Grid g);
 
 signals:
     

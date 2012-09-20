@@ -21,6 +21,7 @@ public:
     
 protected:
     void keyPressEvent( QKeyEvent* pEvent );
+    void keyReleaseEvent( QKeyEvent* pEvent );
 
 private:
     Ui::MazeWindow *ui;

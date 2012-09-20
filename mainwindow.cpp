@@ -16,7 +16,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_launchButton_clicked()
 {
     ui->launchButton->setEnabled(false);
-
+    repaint();
     QMazeGen newMaze;
     newMaze.setSize(size);
     newMaze.makeMaze();
@@ -35,7 +35,6 @@ void MainWindow::on_mapSlider_valueChanged(int value)
 void MainWindow::windowClosed()
 {
     ui->launchButton->setEnabled(true);
-    //delete mazeW;
     mazeW = NULL;
 }
 
