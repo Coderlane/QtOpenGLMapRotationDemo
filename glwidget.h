@@ -36,8 +36,8 @@ const int    ball_sides   = 30;
 const int    ball_sectors = 30;
 const double ball_size    = .666;
 // Ball Movement
-const double ball_dy_max  = .5;
-const double ball_dx_max  = .5;
+const double ball_dy_max  = .1;
+const double ball_dx_max  = .1;
 const double ball_ds      = 1;
 
 class GLWidget : public QGLWidget
@@ -90,8 +90,8 @@ private:
     // Functions
     // Ball
     GLuint newBall();
-    float checkX(float x);
-    float checkY(float y);
+    bool checkX(Coord c);
+    bool checkY(Coord c);
     // Maze
     GLuint newMaze();
     // Wall

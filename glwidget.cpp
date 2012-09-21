@@ -25,15 +25,15 @@ void GLWidget::loop()
         if(ballDY != 0)
         {
             newPos.y += ballDY;
-            newPos.y = checkY(newPos.y);
+            if(checkY(newPos))
+                ballPos.y = newPos.y;
         }
         if(ballDX != 0)
         {
             newPos.x  += ballDX;
-            newPos.x = checkX(newPos.x);
+            if(checkX(newPos))
+                ballPos.x = newPos.x;
         }
-        ballPos.x = newPos.x;
-        ballPos.y = newPos.y;
     }
     updateGL();
 }
@@ -187,7 +187,7 @@ GLuint GLWidget::newMaze()
         }
     }
     float space = (10.0/sides);
-    /*
+
 
     // Outer Perimeter of walls
 
@@ -203,7 +203,7 @@ GLuint GLWidget::newMaze()
         wallList.append((struct Coord) {-10-space, -i*space, space});
         wallList.append((struct Coord) { 10+space, -i*space, space});
     }
-        */
+
     wallList.append((struct Coord) {-10.0f + ((float)0*2*space) + space,-10.0f + ((float)0*2*space) + space , space});
     // Actual Maze
     for(int a = 0; a < sides; a++)
@@ -412,19 +412,23 @@ Coord GLWidget::toCoord2D(Grid g)
 // 0, 0 should be bottom left.....
 Grid GLWidget::toGrid2D(Coord c)
 {
-
-    float space = (10.0/sides);
     Grid g;
-    float tx = sides + (c.x * space);
-    float ty = sides + (c.y * space);
-    if(ty >(int)ty)
-        g.y = ((int)ty)+1;
+    float ratio = (sides/10.0);
+
+    float tx = (c.x + 10.0) / 2.0;
+    float ty = (c.y + 10.0) / 2.0;
+
+    if(ty > (int)ty)
+        ty = ((int)ty)+1;
     else
-        g.y = ty;
+        ty = (int)ty;
+
     if(tx > (int)tx)
-        g.x = ((int)tx)+1;
+        tx = ((int)tx)+1;
     else
-        g.x = tx;
+        tx= (int)tx;
+    g.x = tx - 1;
+    g.y = ty - 1;
     return g;
 }
 QVector<Grid> GLWidget::checkOpenAround(Grid g)
@@ -454,12 +458,29 @@ QVector<Grid> GLWidget::checkOpenAround(Grid g)
     return openGrid;
 }
 
-float GLWidget::checkX(float x)
+bool GLWidget::checkX(Coord c)
 {
-    return x;
+    Grid next = toGrid2D(c);
+    Grid cur  = toGrid2D(ballPos);
+    if(cur.x == next.x)
+        return true;
+    else
+        if(next.x <= sides-1 && next.x >= 0)
+            if(!m[next.x][next.y])
+                return true;
+    return false;
 }
 
-float GLWidget::checkY(float y)
+bool GLWidget::checkY(Coord c)
 {
-    return y;
+    Grid next = toGrid2D(c);
+    Grid cur  = toGrid2D(ballPos);
+    if(cur.y == next.y)
+        return true;
+    else
+        if(next.y <= sides-1 && next.y >= 0 )
+            if(!m[next.x][next.y])
+                 return true;
+    return false;
 }
+
