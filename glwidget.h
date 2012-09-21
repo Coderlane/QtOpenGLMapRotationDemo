@@ -83,8 +83,9 @@ private:
     QList<Coord> wallList;
     QVector<QVector<short> > m;
 
-    double ballDY;
-    double ballDX;
+    float ballDY;
+    float ballDX;
+    float ballRadius;
     Coord ballPos;
 
     // Functions

@@ -22,17 +22,50 @@ void GLWidget::loop()
         Coord newPos;
         newPos.x = ballPos.x;
         newPos.y = ballPos.y;
-        if(ballDY != 0)
+
+        // Check Y
+        if(ballDY >= 0)
         {
-            newPos.y += ballDY;
-            if(checkY(newPos))
-                ballPos.y = newPos.y;
+            newPos.y += ballDY + ballRadius;
+            float left = ballPos.x + ballRadius;
+            float right = ballPos.x - ballRadius;
+
+            if(checkY(newPos) && checkX((struct Coord) {left, newPos.y, 0.0f}) && checkX((struct Coord) {right, newPos.y, 0.0f}))
+               ballPos.y = newPos.y - ballRadius;
+            newPos.y -= ballRadius;
         }
-        if(ballDX != 0)
+        else if(ballDY <= 0)
         {
-            newPos.x  += ballDX;
-            if(checkX(newPos))
-                ballPos.x = newPos.x;
+
+            newPos.y += ballDY - ballRadius;
+            float left = ballPos.x + ballRadius;
+            float right = ballPos.x - ballRadius;
+
+            if(checkY(newPos) && checkX((struct Coord) {left, newPos.y, 0.0f}) && checkX((struct Coord) {right, newPos.y, 0.0f}))
+               ballPos.y = newPos.y + ballRadius;
+            newPos.y += ballRadius;
+        }
+        // Check X
+        if(ballDX >= 0)
+        {
+            newPos.x += ballDX + ballRadius;
+            float up = ballPos.y + ballRadius;
+            float down = ballPos.y - ballRadius;
+
+            if(checkX(newPos) && checkX((struct Coord) {newPos.x, up, 0.0f}) && checkX((struct Coord) {newPos.x, down, 0.0f}))
+                ballPos.x = newPos.x - ballRadius;
+            newPos.x -= ballRadius;
+        }
+        else if(ballDX <= 0)
+        {
+            newPos.x += ballDX - ballRadius;
+            float up = ballPos.y + ballRadius;
+            float down = ballPos.y - ballRadius;
+
+
+            if(checkX(newPos) && checkX((struct Coord) {newPos.x, up, 0.0f}) && checkX((struct Coord) {newPos.x, down, 0.0f}))
+                ballPos.x = newPos.x + ballRadius;
+            newPos.x += ballRadius;
         }
     }
     updateGL();
@@ -112,8 +145,9 @@ void GLWidget::setupSim(int s, QVector<QVector<short> > nM)
     wall = newWall();
     maze = newMaze();
     ball = newBall();
-    ballPos.x = -10 + ((10.0/(double)sides));//*2.0 ;
+    ballPos.x = 10 - ((10.0/(double)sides));//*2.0 ;
     ballPos.y = 10 - ((10.0/(double)sides));//*2.0;
+    ballRadius = (10.0/sides) * ball_size;
     unpause();
     updateGL();
 }
@@ -204,7 +238,7 @@ GLuint GLWidget::newMaze()
         wallList.append((struct Coord) { 10+space, -i*space, space});
     }
 
-    wallList.append((struct Coord) {-10.0f + ((float)0*2*space) + space,-10.0f + ((float)0*2*space) + space , space});
+    //wallList.append((struct Coord) {-10.0f + ((float)0*2*space) + space,-10.0f + ((float)0*2*space) + space , space});
     // Actual Maze
     for(int a = 0; a < sides; a++)
     {
@@ -413,7 +447,7 @@ Coord GLWidget::toCoord2D(Grid g)
 Grid GLWidget::toGrid2D(Coord c)
 {
     Grid g;
-    float ratio = (sides/10.0);
+    //float ratio = (sides/10.0);
 
     float tx = (c.x + 10.0) / 2.0;
     float ty = (c.y + 10.0) / 2.0;
@@ -483,4 +517,3 @@ bool GLWidget::checkY(Coord c)
                  return true;
     return false;
 }
-
