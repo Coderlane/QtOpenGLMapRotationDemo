@@ -15,9 +15,42 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(parent)
     ballDY = 0;
     ballDX = 0;
 }
+
+bool GLWidget::checkAround(Coord ball, float radius)
+{
+	bool checkVal = true;
+	Coord nPos;
+	nPos.x = ball.x + radius;
+	nPos.y = ball.y + radius;
+	checkVal &= checkY(nPos) && checkX(nPos);
+	nPos.x = ball.x - radius;
+	nPos.y = ball.y + radius;
+	checkVal &= checkY(nPos) && checkX(nPos);
+	nPos.x = ball.x + radius;
+	nPos.y = ball.y - radius;
+	checkVal &= checkY(nPos) && checkX(nPos);
+	nPos.x = ball.x - radius;
+	nPos.y = ball.y - radius;
+	checkVal &= checkY(nPos) && checkX(nPos);
+	return checkVal;
+}
+
 void GLWidget::loop()
 {
-    if(ballDY != 0 || ballDX != 0)
+	if(ballDY != 0 || ballDX != 0)
+	{
+		ballPos.x += ballDX;
+		ballPos.y += ballDY;
+
+		if(checkAround(ballPos))
+		{
+			ballPos.x -= ballDX;
+			ballPos.y -= ballDY;
+		}
+
+
+	}
+    /*if(ballDY != 0 || ballDX != 0)
     {
         Coord newPos;
         newPos.x = ballPos.x;
@@ -67,7 +100,7 @@ void GLWidget::loop()
                 ballPos.x = newPos.x + ballRadius;
             newPos.x += ballRadius;
         }
-    }
+    }*/
     updateGL();
 }
 void GLWidget::initializeGL()
