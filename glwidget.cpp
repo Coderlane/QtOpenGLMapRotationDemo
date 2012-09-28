@@ -37,12 +37,14 @@ bool GLWidget::checkAround(Coord ball, float radius)
 
 void GLWidget::loop()
 {
+
+    /*
 	if(ballDY != 0 || ballDX != 0)
 	{
 		ballPos.x += ballDX;
 		ballPos.y += ballDY;
 
-		if(checkAround(ballPos))
+        if(checkAround(ballPos, ballRadius))
 		{
 			ballPos.x -= ballDX;
 			ballPos.y -= ballDY;
@@ -50,7 +52,9 @@ void GLWidget::loop()
 
 
 	}
-    /*if(ballDY != 0 || ballDX != 0)
+    */
+
+    if(ballDY != 0 || ballDX != 0)
     {
         Coord newPos;
         newPos.x = ballPos.x;
@@ -100,7 +104,8 @@ void GLWidget::loop()
                 ballPos.x = newPos.x + ballRadius;
             newPos.x += ballRadius;
         }
-    }*/
+    }
+
     updateGL();
 }
 void GLWidget::initializeGL()

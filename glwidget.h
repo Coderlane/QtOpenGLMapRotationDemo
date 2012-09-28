@@ -93,6 +93,7 @@ private:
     GLuint newBall();
     bool checkX(Coord c);
     bool checkY(Coord c);
+    bool checkAround(Coord ball, float radius);
     // Maze
     GLuint newMaze();
     // Wall
