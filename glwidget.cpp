@@ -132,7 +132,7 @@ void GLWidget::paintGL()
 
     // Show Text
     glColor3f(1.0f, 1.0f, 1.0f);
-    renderText( 10,  9 , 0, "Map Demo", QFont("Ubuntu", 30, 10, false));  
+    renderText( 15,  9 , 0, "Map Demo", QFont("Ubuntu", 30, 10, false));
 
     // Place the lights about the origin
     glPushMatrix();

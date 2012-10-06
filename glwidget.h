@@ -3,7 +3,7 @@
 
 #include <QGLWidget>
 #include <GL/glu.h>
-#include <GL/freeglut.h>
+//#include <GL/freeglut.h>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QList>

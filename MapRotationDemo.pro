@@ -25,7 +25,7 @@ FORMS    += mainwindow.ui \
     mazewindow.ui
 
 
-QMAKE_CXXFLAGS += -std=c++0x
+QMAKE_CXXFLAGS += -std=gnu++0x
 
 
 !win32 {
